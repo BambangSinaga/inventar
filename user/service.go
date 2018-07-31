@@ -52,6 +52,10 @@ func (s *service) Signin(ctx context.Context, credential *inventar.Credential) (
 		return false, err
 	}
 
+	if res == false {
+		return false, inventar.ErrInvalidUsernamePassword
+	}
+
 	return res, nil
 }
 

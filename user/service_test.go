@@ -151,6 +151,26 @@ func TestSigninWithErrorValidate(t *testing.T) {
 	assert.False(t, res)
 }
 
+func TestSigninWithInvalidUsernamePassoword(t *testing.T) {
+
+	mockCredential := &inventar.Credential{
+		Username: "admin",
+		Password: "admin123",
+	}
+
+	r := new(mocks.UserRepository)
+	r.On("Signin", mock.Anything, mockCredential).Return(false, nil)
+
+	v := inventar.NewValidator()
+
+	s := NewService(r, v, timeout)
+
+	res, err := s.Signin(context.TODO(), mockCredential)
+
+	assert.Error(t, err)
+	assert.False(t, res)
+}
+
 func TestSigninWithError(t *testing.T) {
 
 	mockCredential := &inventar.Credential{
