@@ -3,15 +3,9 @@ package inventar
 import "errors"
 
 var (
-	ErrContextNil                 = errors.New("Context is nil")
-	ErrUserSubscriptionNotUpdated = errors.New("User subscription is not updated")
-	ErrInvalidSubscriptionObject  = errors.New("Invalid item subscription")
-	ErrSubscriptionNotFound       = errors.New("Subscription Object Not Found")
-	ErrSubscriptionAlreadyExists  = errors.New("Subscription Object Already Exists")
-
-	ErrUserNotAuthorized = errors.New("User not authorized")
-
-	ErrBadRequest = errors.New("Please check your request param or body")
+	ErrContextNil              = errors.New("Context is nil")
+	ErrInvalidUsernamePassword = errors.New("Username and password invalid")
+	ErrUserNotAuthorized       = errors.New("User not authorized")
 )
 
 type customError struct {
