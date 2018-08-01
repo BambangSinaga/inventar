@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/West-Labs/inventar"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type service struct {
@@ -35,6 +36,14 @@ func (s *service) Signup(ctx context.Context, credential *inventar.Credential) (
 		return false, inventar.ErrUsernameHasBeenTaken
 	}
 
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(credential.Password), 8)
+
+	if err != nil {
+		return false, err
+	}
+
+	credential.Password = string(hashedPassword)
+
 	res, err := s.repository.Signup(ctx, credential)
 
 	if err != nil {
@@ -55,6 +64,14 @@ func (s *service) Signin(ctx context.Context, credential *inventar.Credential) (
 	if err := s.validator.ValidateStruct(credential); err != nil {
 		return false, err
 	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(credential.Password), 8)
+
+	if err != nil {
+		return false, err
+	}
+
+	credential.Password = string(hashedPassword)
 
 	res, err := s.repository.Signin(ctx, credential)
 
