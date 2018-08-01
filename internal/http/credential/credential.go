@@ -28,11 +28,11 @@ func (h *httpHandler) HandleSignupUser(c echo.Context) error {
 
 	ctx := context.Background()
 	credNew, err := h.service.Signup(ctx, u)
-	if err != nil {
+	if err != nil || !credNew {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
-	return c.JSON(http.StatusOK, credNew)
+	return c.JSON(http.StatusOK, &ResponseError{Message: "Sign Up Success"})
 }
 
 func (h *httpHandler) HandleSigninUser(c echo.Context) error {

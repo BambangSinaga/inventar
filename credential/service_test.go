@@ -24,10 +24,7 @@ func TestSignup(t *testing.T) {
 		Password: "admin123",
 	}
 
-	mockCredentialEmpty := &inventar.Credential{}
-
 	r := new(mocks.UserRepository)
-	r.On("GetByUsername", mock.Anything, mockCredential.Username).Return(mockCredentialEmpty, nil)
 	r.On("Signup", mock.Anything, mockCredential).Return(true, nil)
 
 	v := inventar.NewValidator()
@@ -77,46 +74,6 @@ func TestSignupWithErrorValidate(t *testing.T) {
 	assert.False(t, res)
 }
 
-func TestSignupWithErrorGetByUsername(t *testing.T) {
-
-	mockCredential := &inventar.Credential{
-		Username: "admin",
-		Password: "admin123",
-	}
-
-	r := new(mocks.UserRepository)
-	r.On("GetByUsername", mock.Anything, mockCredential.Username).Return(nil, errors.New("Error"))
-
-	v := inventar.NewValidator()
-
-	s := NewService(r, v, timeout)
-
-	res, err := s.Signup(context.TODO(), mockCredential)
-
-	assert.Error(t, err)
-	assert.False(t, res)
-}
-
-func TestSignupWithUsernameHasBeenTaken(t *testing.T) {
-
-	mockCredential := &inventar.Credential{
-		Username: "admin",
-		Password: "admin123",
-	}
-
-	r := new(mocks.UserRepository)
-	r.On("GetByUsername", mock.Anything, mockCredential.Username).Return(mockCredential, nil)
-
-	v := inventar.NewValidator()
-
-	s := NewService(r, v, timeout)
-
-	res, err := s.Signup(context.TODO(), mockCredential)
-
-	assert.Error(t, err)
-	assert.False(t, res)
-}
-
 func TestSignupWithError(t *testing.T) {
 
 	mockCredential := &inventar.Credential{
@@ -124,10 +81,7 @@ func TestSignupWithError(t *testing.T) {
 		Password: "admin123",
 	}
 
-	mockCredentialEmpty := &inventar.Credential{}
-
 	r := new(mocks.UserRepository)
-	r.On("GetByUsername", mock.Anything, mockCredential.Username).Return(mockCredentialEmpty, nil)
 	r.On("Signup", mock.Anything, mockCredential).Return(false, errors.New("Error"))
 
 	v := inventar.NewValidator()

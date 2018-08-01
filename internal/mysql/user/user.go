@@ -9,12 +9,12 @@ import (
 )
 
 // UserMysqlRepository is struct to initiate mysql repo for user
-type UserMysqlRepository struct {
+type UserRepository struct {
 	DB *sql.DB
 }
 
 // Sign Up
-func (u *UserMysqlRepository) Signup(ctx context.Context, credential *inventar.Credential) (bool, error) {
+func (u *UserRepository) Signup(ctx context.Context, credential *inventar.Credential) (bool, error) {
 
 	trx, err := u.DB.BeginTx(ctx, nil)
 	if err != nil {
@@ -49,7 +49,7 @@ func (u *UserMysqlRepository) Signup(ctx context.Context, credential *inventar.C
 }
 
 // Sign In
-func (u *UserMysqlRepository) Signin(ctx context.Context, credential *inventar.Credential) (bool, error) {
+func (u *UserRepository) Signin(ctx context.Context, credential *inventar.Credential) (bool, error) {
 
 	query := "SELECT id from user where username = ? and password = ?"
 	rows, err := u.DB.Query(query, credential.Username, credential.Password)

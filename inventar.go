@@ -14,5 +14,4 @@ type UserService interface {
 type UserRepository interface {
 	Signup(ctx context.Context, credential *Credential) (bool, error)
 	Signin(ctx context.Context, credential *Credential) (bool, error)
-	GetByUsername(ctx context.Context, username string) (*Credential, error)
 }

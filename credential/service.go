@@ -26,16 +26,6 @@ func (s *service) Signup(ctx context.Context, credential *inventar.Credential) (
 		return false, err
 	}
 
-	checkUsername, err := s.repository.GetByUsername(ctx, credential.Username)
-
-	if err != nil {
-		return false, err
-	}
-
-	if checkUsername.Username != "" {
-		return false, inventar.ErrUsernameHasBeenTaken
-	}
-
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(credential.Password), 8)
 
 	if err != nil {
