@@ -65,7 +65,7 @@ func (s *UserRepositoryTestSuite) TestSigin() {
 	err := s.seedUser(mockUser)
 	require.NoError(s.T(), err)
 
-	repo := UserMysqlRepository{DB: s.DBConn}
+	repo := UserRepository{DB: s.DBConn}
 	ctx := context.Background()
 	res, err := repo.Signin(ctx, mockUser)
 	assert.NoError(s.T(), err)
@@ -87,7 +87,7 @@ func (s *UserRepositoryTestSuite) TestSiginInvalidCredential() {
 	err := s.seedUser(mockUser)
 	require.NoError(s.T(), err)
 
-	repo := UserMysqlRepository{DB: s.DBConn}
+	repo := UserRepository{DB: s.DBConn}
 	ctx := context.Background()
 	res, err := repo.Signin(ctx, mockLogin)
 	assert.NoError(s.T(), err)
@@ -101,7 +101,7 @@ func (s *UserRepositoryTestSuite) TestSignup() {
 		Password: "admin123",
 	}
 
-	repo := UserMysqlRepository{DB: s.DBConn}
+	repo := UserRepository{DB: s.DBConn}
 	ctx := context.Background()
 	res, err := repo.Signup(ctx, mockUser)
 	assert.NoError(s.T(), err)
