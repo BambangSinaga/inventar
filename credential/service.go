@@ -2,6 +2,7 @@ package credential
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/West-Labs/inventar"
@@ -24,6 +25,16 @@ func (s *service) Signup(ctx context.Context, credential *inventar.Credential) (
 
 	if err := s.validator.ValidateStruct(credential); err != nil {
 		return false, err
+	}
+
+	checkUsername, err := s.repository.GetByUsername(ctx, credential.Username)
+
+	if err != nil {
+		return false, err
+	}
+
+	if checkUsername.Username != "" {
+		return false, inventar.ErrUsernameHasBeenTaken
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(credential.Password), 8)
@@ -55,25 +66,18 @@ func (s *service) Signin(ctx context.Context, credential *inventar.Credential) (
 		return false, err
 	}
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(credential.Password), 8)
+	getByUsername, err := s.repository.GetByUsername(ctx, credential.Username)
 
 	if err != nil {
-		return false, err
+		return false, inventar.ErrUserNotAuthorized
 	}
 
-	credential.Password = string(hashedPassword)
-
-	res, err := s.repository.Signin(ctx, credential)
-
-	if err != nil {
-		return false, err
+	if err = bcrypt.CompareHashAndPassword([]byte(getByUsername.Password), []byte(credential.Password)); err != nil {
+		fmt.Println(err)
+		return false, inventar.ErrUserNotAuthorized
 	}
 
-	if res == false {
-		return false, inventar.ErrInvalidUsernamePassword
-	}
-
-	return res, nil
+	return true, nil
 }
 
 // NewService is implementation of user service interface

@@ -55,45 +55,6 @@ func (s *UserRepositoryTestSuite) seedUser(c *inventar.Credential) error {
 	return nil
 }
 
-func (s *UserRepositoryTestSuite) TestSigin() {
-
-	mockUser := &inventar.Credential{
-		Username: "admin",
-		Password: "admin123",
-	}
-
-	err := s.seedUser(mockUser)
-	require.NoError(s.T(), err)
-
-	repo := UserRepository{DB: s.DBConn}
-	ctx := context.Background()
-	res, err := repo.Signin(ctx, mockUser)
-	assert.NoError(s.T(), err)
-	assert.True(s.T(), res)
-}
-
-func (s *UserRepositoryTestSuite) TestSiginInvalidCredential() {
-
-	mockUser := &inventar.Credential{
-		Username: "admin",
-		Password: "admin123",
-	}
-
-	mockLogin := &inventar.Credential{
-		Username: "admin",
-		Password: "admin",
-	}
-
-	err := s.seedUser(mockUser)
-	require.NoError(s.T(), err)
-
-	repo := UserRepository{DB: s.DBConn}
-	ctx := context.Background()
-	res, err := repo.Signin(ctx, mockLogin)
-	assert.NoError(s.T(), err)
-	assert.False(s.T(), res)
-}
-
 func (s *UserRepositoryTestSuite) TestSignup() {
 
 	mockUser := &inventar.Credential{
@@ -106,4 +67,38 @@ func (s *UserRepositoryTestSuite) TestSignup() {
 	res, err := repo.Signup(ctx, mockUser)
 	assert.NoError(s.T(), err)
 	assert.True(s.T(), res)
+}
+
+func (s *UserRepositoryTestSuite) TestGetByUsername() {
+
+	mockUser := &inventar.Credential{
+		Username: "admin",
+		Password: "admin123",
+	}
+
+	err := s.seedUser(mockUser)
+	require.NoError(s.T(), err)
+
+	repo := UserRepository{DB: s.DBConn}
+	ctx := context.Background()
+	res, err := repo.GetByUsername(ctx, mockUser.Username)
+	assert.NoError(s.T(), err)
+	assert.NotEmpty(s.T(), res)
+}
+
+func (s *UserRepositoryTestSuite) TestGetByUsernameNotFound() {
+
+	mockUser := &inventar.Credential{
+		Username: "admin",
+		Password: "admin123",
+	}
+
+	err := s.seedUser(mockUser)
+	require.NoError(s.T(), err)
+
+	repo := UserRepository{DB: s.DBConn}
+	ctx := context.Background()
+	res, err := repo.GetByUsername(ctx, "admin123")
+	assert.NoError(s.T(), err)
+	assert.Empty(s.T(), res)
 }

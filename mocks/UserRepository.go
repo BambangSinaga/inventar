@@ -10,20 +10,22 @@ type UserRepository struct {
 	mock.Mock
 }
 
-// Signin provides a mock function with given fields: ctx, credential
-func (_m *UserRepository) Signin(ctx context.Context, credential *inventar.Credential) (bool, error) {
-	ret := _m.Called(ctx, credential)
+// GetByUsername provides a mock function with given fields: ctx, username
+func (_m *UserRepository) GetByUsername(ctx context.Context, username string) (*inventar.Credential, error) {
+	ret := _m.Called(ctx, username)
 
-	var r0 bool
-	if rf, ok := ret.Get(0).(func(context.Context, *inventar.Credential) bool); ok {
-		r0 = rf(ctx, credential)
+	var r0 *inventar.Credential
+	if rf, ok := ret.Get(0).(func(context.Context, string) *inventar.Credential); ok {
+		r0 = rf(ctx, username)
 	} else {
-		r0 = ret.Get(0).(bool)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*inventar.Credential)
+		}
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, *inventar.Credential) error); ok {
-		r1 = rf(ctx, credential)
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, username)
 	} else {
 		r1 = ret.Error(1)
 	}
