@@ -48,36 +48,37 @@ func (u *UserRepository) Signup(ctx context.Context, credential *inventar.Creden
 	return true, trx.Commit()
 }
 
-// Sign In
-func (u *UserRepository) Signin(ctx context.Context, credential *inventar.Credential) (bool, error) {
+// Get By Username
+func (u *UserRepository) GetByUsername(ctx context.Context, username string) (*inventar.Credential, error) {
 
-	query := "SELECT id from user where username = ? and password = ?"
-	rows, err := u.DB.Query(query, credential.Username, credential.Password)
+	query := "SELECT username, password from user where username = ?"
+	rows, err := u.DB.Query(query, username)
 	if err != nil {
-		return false, err
+		return &inventar.Credential{}, err
 	}
 	defer rows.Close()
 
-	id := 0
+	cred := &inventar.Credential{}
 	for rows.Next() {
 
 		err = rows.Scan(
-			&id,
+			&cred.Username,
+			&cred.Password,
 		)
 
 		if err != nil {
-			return false, err
+			return &inventar.Credential{}, err
 		}
 	}
 
 	err = rows.Err()
 	if err != nil {
-		return false, err
+		return &inventar.Credential{}, err
 	}
 
-	if id == 0 {
-		return false, nil
+	if cred.Username == "" {
+		return &inventar.Credential{}, err
 	}
 
-	return true, nil
+	return cred, err
 }

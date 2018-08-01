@@ -3,6 +3,7 @@ package credential
 import (
 	"context"
 	"errors"
+	"fmt"
 	"testing"
 	"time"
 
@@ -10,6 +11,7 @@ import (
 	"github.com/West-Labs/inventar/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"golang.org/x/crypto/bcrypt"
 )
 
 var (
@@ -25,6 +27,7 @@ func TestSignup(t *testing.T) {
 	}
 
 	r := new(mocks.UserRepository)
+	r.On("GetByUsername", mock.Anything, mockCredential.Username).Return(&inventar.Credential{}, nil)
 	r.On("Signup", mock.Anything, mockCredential).Return(true, nil)
 
 	v := inventar.NewValidator()
@@ -82,6 +85,7 @@ func TestSignupWithError(t *testing.T) {
 	}
 
 	r := new(mocks.UserRepository)
+	r.On("GetByUsername", mock.Anything, mockCredential.Username).Return(&inventar.Credential{}, nil)
 	r.On("Signup", mock.Anything, mockCredential).Return(false, errors.New("Error"))
 
 	v := inventar.NewValidator()
@@ -94,7 +98,7 @@ func TestSignupWithError(t *testing.T) {
 	assert.False(t, res)
 }
 
-func TestSignin(t *testing.T) {
+func TestSignupErrorWithUsernamehasbeentaken(t *testing.T) {
 
 	mockCredential := &inventar.Credential{
 		Username: "admin",
@@ -102,14 +106,43 @@ func TestSignin(t *testing.T) {
 	}
 
 	r := new(mocks.UserRepository)
-	r.On("Signin", mock.Anything, mockCredential).Return(true, nil)
+	r.On("GetByUsername", mock.Anything, mockCredential.Username).Return(mockCredential, nil)
+	r.On("Signup", mock.Anything, mockCredential).Return(false, nil)
 
 	v := inventar.NewValidator()
 
 	s := NewService(r, v, timeout)
 
-	res, err := s.Signin(context.TODO(), mockCredential)
+	res, err := s.Signup(context.TODO(), mockCredential)
+	assert.Error(t, err)
+	assert.False(t, res)
+}
 
+func TestSignin(t *testing.T) {
+
+	mockCredentialNonHashed := &inventar.Credential{
+		Username: "admin",
+		Password: "tesla123@",
+	}
+
+	mockCredentialHashed := &inventar.Credential{
+		Username: "admin",
+		Password: "tesla123@",
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(mockCredentialHashed.Password), 8)
+
+	mockCredentialHashed.Password = string(hashedPassword)
+	fmt.Println(mockCredentialHashed.Password)
+
+	r := new(mocks.UserRepository)
+	r.On("GetByUsername", mock.Anything, mockCredentialHashed.Username).Return(mockCredentialHashed, nil)
+
+	v := inventar.NewValidator()
+
+	s := NewService(r, v, timeout)
+
+	res, err := s.Signin(context.TODO(), mockCredentialNonHashed)
 	assert.NoError(t, err)
 	assert.True(t, res)
 }
@@ -159,7 +192,7 @@ func TestSigninWithInvalidUsernamePassoword(t *testing.T) {
 	}
 
 	r := new(mocks.UserRepository)
-	r.On("Signin", mock.Anything, mockCredential).Return(false, nil)
+	r.On("GetByUsername", mock.Anything, mockCredential.Username).Return(&inventar.Credential{}, nil)
 
 	v := inventar.NewValidator()
 
@@ -171,22 +204,31 @@ func TestSigninWithInvalidUsernamePassoword(t *testing.T) {
 	assert.False(t, res)
 }
 
-func TestSigninWithError(t *testing.T) {
+func TestSigninWithNoRecord(t *testing.T) {
 
-	mockCredential := &inventar.Credential{
+	mockCredentialNonHashed := &inventar.Credential{
 		Username: "admin",
-		Password: "admin123",
+		Password: "tesla123@",
 	}
 
+	mockCredentialHashed := &inventar.Credential{
+		Username: "admin",
+		Password: "tesla123@",
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(mockCredentialHashed.Password), 8)
+
+	mockCredentialHashed.Password = string(hashedPassword)
+	fmt.Println(mockCredentialHashed.Password)
+
 	r := new(mocks.UserRepository)
-	r.On("Signin", mock.Anything, mockCredential).Return(false, errors.New("Error"))
+	r.On("GetByUsername", mock.Anything, mockCredentialHashed.Username).Return(nil, errors.New("Error"))
 
 	v := inventar.NewValidator()
 
 	s := NewService(r, v, timeout)
 
-	res, err := s.Signin(context.TODO(), mockCredential)
-
+	res, err := s.Signin(context.TODO(), mockCredentialNonHashed)
 	assert.Error(t, err)
 	assert.False(t, res)
 }
